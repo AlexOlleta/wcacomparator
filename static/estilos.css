@@ -1,0 +1,33 @@
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
+
+#input_error {
+	color: red;
+}
+
+.loader {
+	position: absolute;
+	margin-top: 5%;
+	margin-left: 10%;
+	width: 50%;
+	height: 50%;
+	z-index: 9999;
+	background: url('page-loader.gif') no-repeat center center;
+}
