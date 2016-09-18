@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="static/favicon.ico">
+
+	<title>WCA Comparator - Links</title>
+
+	<link href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+
+  <!-- Cubing Icons -->
+  <link href="{{ url_for('static', filename='assets/css/cubing-icons.css') }}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body onload="show_output();">
+	{% include 'header.html' %}
+
+	<div class="jumbotron">
+    	<div class="container">
+        	<h1>WCA Comparator - Links</h1>
+        	<p>The WCA it's a large community with lot of contributions from people around the world. That's why I decided not to repeat others work, but try to put all that work together.</p>
+      </div>
+  </div>
+
+	<div class="container">
+    <h2> Database websites</h2>
+    <ul>
+      <li><a href="https://www.worldcubeassociation.org/results/statistics.php">Official WCA's Stats</a></li>
+      <li><a href="http://wcadb.net">WCA Database</a></li>
+      <li><a href="http://iwca.jp/">Sinpei Araki's iWCA</a></li>
+    </ul>
+
+    <h2> Forums' threads </h2>
+    <ul>
+      <li><a href="https://www.speedsolving.com/forum/threads/odd-wca-stats-stats-request-thread.26121/">Speedsolving</a></li>
+      <li><a href="http://www.rubikaz.com/foro/viewtopic.php?f=1&t=12158">Rubikaz</a></li>
+    </ul>
+
+    <h2> Python Code </h2>
+    <ul>
+      <li><a href="https://github.com/jakobkogler/guildford_challenge/blob/master/README.md">Guildford Challenge</a></li>
+      <li><a href="https://github.com/pochmann/sum-of-wca-ranks">Sum of Ranks</a></li>
+      <li><a href="https://github.com/pochmann/wca-data-tools">WCA Data Tools</a></li>
+    </ul>
+
+    <h2> Others </h2>
+    <ul>
+      <li><a href="http://hem.bredband.net/_zlv_/rubiks/stats/wca-stats-start.html">Lid's WCA Stats</a></li>
+      <li><a href="http://www.terabo.net/cubjectives/">Speed-Cubjectives</a></li>
+      <li><a href="http://www.kinch2002.com/profile-comparison/">Kinch2002</a></li>
+      <li><a href="http://cubesolv.es/">Cube Solves</a></li>
+      <li><a href="https://www.youtube.com/watch?v=In2H0fmbxn8">Pyraminx Average Progression Chart Construction</a></li>
+    </ul>
+
+    <hr>
+	
+		{% include 'footer.html' %}
+	</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='assets/js/jquery-1.11.3.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='assets/js/bootstrap.min.js') }}"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="{{ url_for('static', filename='assets/js/ie10-viewport-bug-workaround.js') }}"></script>
+
+</body>
+</html>

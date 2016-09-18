@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="static/favicon.ico">
+
+	<title>WCA Comparator - Links</title>
+
+	<link href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+
+  <!-- Cubing Icons -->
+  <link href="{{ url_for('static', filename='assets/css/cubing-icons.css') }}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body onload="show_output();">
+	{% include 'header.html' %}
+
+	<div class="jumbotron">
+    	<div class="container">
+        	<h1>WCA Comparator - Personal Zone</h1>
+        	<p>Nothing important yet.</p>
+      </div>
+  </div>
+
+	<div class="container">
+    <h2> Download</h2>
+
+    <div>
+      <button type="button" id="download" class ="btn btn-primary btn-block">Download</button>
+      <p id="down_text">{{ msg }} 
+        {% with message = get_flashed_messages() %}
+          {% if message %} 
+            {{ message[0] }}
+          {% endif %}
+        {% endwith %}
+      </p>
+    </div>
+
+    <h2>Logout</h2>
+      <button type="button" id="logout" class ="btn btn-danger btn-block">Logout</button>
+
+    <hr>
+	
+		{% include 'footer.html' %}
+	</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='assets/js/jquery-1.11.3.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='assets/js/bootstrap.min.js') }}"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="{{ url_for('static', filename='assets/js/ie10-viewport-bug-workaround.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='personal.js') }}"></script>
+
+</body>
+</html>

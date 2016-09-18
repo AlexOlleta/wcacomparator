@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="static/favicon.ico">
+
+	<title>WCA Comparator - Find</title>
+
+	<link href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+
+  <!-- Cubing Icons -->
+  <link href="{{ url_for('static', filename='assets/css/cubing-icons.css') }}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body onload="show_output();">
+	{% include 'header.html' %}
+
+	<div class="jumbotron">
+    <div class="container">
+      <h1>WCA Comparator - Find</h1>
+        <p>Find your profile or another cuber's one. Find about your country or about another's one. Find some national, continental or world rankings. <i>It's neccesary to have a WCA ID to find someone's profile.</i></p>
+    </div>
+  </div>
+
+	<div class="container">
+		<div class="row">
+      <form>
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="inputid">Introduce a WCA profile or a Country:</label>
+            <input type="text" class="form-control" placeholder="WCA ID ó Pais" id="wcaid-country"><br>
+            <button type="button" id="get-wcaid-country" class="btn btn-primary btn-block">{{ find }}</button>
+          </div>
+        </div>
+      <form>
+    </div>
+
+    <br>
+
+    <div id="output-country">
+
+      <div>                            
+        <ul class="nav nav-tabs" role="tablist" id="country-submenu">
+          <li role="presentation" class="active"><a href="#output-country-medals" aria-controls="output-country-medals" role="tab" data-toggle="tab">Medals table</a></li>
+          <li role="presentation"><a href="#output-country-achievements" aria-controls="output-country-achievements" role="tab" data-toggle="tab">Achievements</a></li>
+          <li role="presentation"><a href="#output-country-more" aria-controls="output-country-more" role="tab" data-toggle="tab">More Information</a></li>
+        </ul>
+      </div>
+
+      <div class="tab-content">
+
+        <div role="tabpanel" class="tab-pane active" id="output-country-medals">
+          <h3>Results</h3>
+          <p>Here you are {{ params.fullname }}'s medals table after {{ params.ncomps }} competitions.</p>
+
+          <table id="country-records" class="table table-hover">
+            <thead>
+              <tr><th>Name</th><th>Gold</th><th>Silver</th><th>Bronze</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              {% for person in params.medallas %}
+                <tr>
+                  <th scope="row"><a href="https://www.worldcubeassociation.org/results/p.php?i={{ person }}" target="_blank">{{ params.medallas[person]["name"] }}</a></th>
+                  <td>{{ params.medallas[person]["medals"][0] }}</td>
+                  <td>{{ params.medallas[person]["medals"][1] }}</td>
+                  <td>{{ params.medallas[person]["medals"][2] }}</td>
+                  <td>{{ params.medallas[person]["total"] }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="output-country-achievements">
+          <h3>Results</h3>
+          <p>Here you are {{ params.fullname }}'s achievements.</p>
+
+          <h3>NR's Evolution</h3>
+          <table id="country-achievements-nrs" class="table table-hover">
+            <thead>
+              <tr><th> </th><th coslpan="3" class="text-center">Single</th><th colspan="3" class="text-center">Average</th></tr>
+              <tr><th>Event</th><th>Name</th><th>Time</th><th></th><th>Name</th><th>Time</th><th></th></tr>
+            </thead>
+            <tbody>
+              {% for nr in params.nrs %}
+              <tr>
+                <th scope="row"><span class="cubing-icon icon-{{ nr[0] }}"></span></th>
+                <td><a href="https://www.worldcubeassociation.org/results/p.php?i={{ nr[1] }}" target="_blank">{{ nr[2] }}</a></td>
+                <td>{{ nr[3] }}</td>
+                <td>
+                  <a href="#goto_chart"><button class="btn btn-success graph" value="sgl-{{ nr[0] }}" type="button">Evolution</button></a>
+                </td>
+                <td><a href="https://www.worldcubeassociation.org/results/p.php?i={{ nr[4] }}" target="_blank">{{ nr[5] }}</a></td>
+                <td>{{ nr[6] }}</td>
+                <td>
+                  <a href="#goto_chart"><button class="btn btn-success graph" value="avg-{{ nr[0] }}" type="button">Evolution</button></a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <a name="goto_chart"></a>
+          <div class="loader"></div>
+          <canvas id="evo" width="600" height="300"></canvas>
+
+          <h3>Number of NRs, CRs and WRs</h3>
+          The score is determined by NR=1, CR=5 and WR=10.
+          <br>
+          <table id="country-achievements-records" class="table table-hover">
+            <thead>
+              <tr><th>Name</th><th>NR</th><th>CR</th><th>WR</th><th>Score</th></tr>
+            </thead>
+            <tbody>
+              {% for record in params.rank_record %}
+              <tr>
+                <td><a href="https://www.worldcubeassociation.org/results/p.php?i={{ record }}" target="_blank">{{ params.rank_record[record]["name"] }}</a></td>
+                <td>{{ params.rank_record[record]["medals"][0] }}</td>
+                <td>{{ params.rank_record[record]["medals"][1] }}</td>
+                <td>{{ params.rank_record[record]["medals"][2] }}</td>
+                <td>{{ params.rank_record[record]["total"] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <h3>Top 100s</h3>
+          <br>
+          <table id="country-achievements-top100s" class="table table-hover">
+            <thead>
+              <tr><th>Name</th><th>Events (position)</th></tr>
+            </thead>
+            <tbody>
+              {% for top in params.top100 %}
+              <tr>
+                <td><a href="https://www.worldcubeassociation.org/results/p.php?i={{ top }}" target="_blank">{{ params.top100[top]["name"] }}</a></td>
+                <td>{{ params.top100[top]["events"] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="output-country-more">
+          <h3>Results</h3>
+          <p>Here you are lot of more information about {{ params.fullname }} from different sources.</p>
+
+          <table id="country-info" class="table table-hover">
+            <thead>
+              <tr><th>Information</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="http://hem.bredband.net/_zlv_/rubiks/stats/days/{{ params.fullname }}.html" target="_blank">Oldest Standing Records</td>
+                <td>Lid's WCA Stats</td>
+              </tr>
+              <tr>
+                <td><a hred="http://cubingchina.com/results/statistics/sum-of-country-ranks?type=single" target="_blank">Sum of Country Ranks</td>
+                <td>Cubing China</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+    <hr>
+	
+		{% include 'footer.html' %}
+	</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='assets/js/jquery-1.11.3.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='assets/js/bootstrap.min.js') }}"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="{{ url_for('static', filename='assets/js/ie10-viewport-bug-workaround.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='find.js') }}"></script>
+</body>
+</html>

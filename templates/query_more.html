@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="static/favicon.ico">
+
+	<title>WCA Comparator - Query</title>
+
+	<link href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+
+  <!-- Cubing Icons -->
+  <link href="{{ url_for('static', filename='assets/css/cubing-icons.css') }}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body onload="show_output();">
+	{% include 'header.html' %}
+
+  <div class="container">
+    <h3>More examples</h3>
+
+    <p>Thanks to all your contributions, mainly through Speedsolving forum (and Stefan who did a summay of some of the queries done there), here you are some examples of queries to introduce and edit in the input. Someone may not work, I haven't checked all of them.</p>
+    <br>
+    <div class="list-group panel-default">
+      <a href="#cities_most_comps" class="list-group-item panel-heading">
+        <h4 class="panel-title">Cities that have hosted the most competitors</h4>
+      </a>
+      <p id="cities_most_comps" class="list-group-item panel-body">
+        SELECT cityName City, COUNT(DISTINCT personId) Competitors, COUNT(DISTINCT id) Competitions, countryId Country<br>
+        FROM Competitions natural JOIN (SELECT DISTINCT competitionId id, personId FROM Results) tmp<br>
+        GROUP BY cityName<br>
+        HAVING Competitors >= 250<br>
+        ORDER BY Competitors DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#citizens_wrs" class="list-group-item panel-heading">
+        <h4 class="panel-title">Citizens of WRs</h4>
+      </a>
+      <p id="citizens_wrs" class="list-group-item panel-body">
+        SELECT continentId CitizensOf, SUM((regionalSingleRecord='WR')+(regionalAverageRecord='WR')) WRs<br>
+        FROM Results, Countries<br>
+        WHERE Countries.id = countryId<br>
+        GROUP BY continentId<br>
+        ORDER BY WRs DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#comps_most_winners" class="list-group-item panel-heading">
+        <h4 class="panel-title">Competitions with most different winners</h4>
+      </a>
+      <p id="comps_most_winners" class="list-group-item panel-body">
+        SELECT competitionId, (COUNT(DISTINCT personId)) nb_winners, (COUNT(DISTINCT eventId)) nb_events<br> 
+        FROM Results <br>
+        WHERE pos="1" AND best>0 AND roundId IN ('f','c')<br> 
+        GROUP BY competitionId <br>
+        ORDER BY nb_winners DESC, nb_events LIMIT 15;
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#avg_ncompetitors" class="list-group-item panel-heading">
+        <h4 class="panel-title">Countries by average number of competitors</h4>
+      </a>
+      <p id="avg_ncompetitors" class="list-group-item panel-body">
+        SELECT countryId, AVG(competitors) avgCompetitors, COUNT(*) competitions, MIN(competitors) minCompetitors, MAX(competitors) maxCompetitors<br>
+        FROM (SELECT competitionId id, COUNT(DISTINCT personId) competitors FROM Results GROUP BY competitionId) tmp<br>
+        NATURAL JOIN Competitions<br>
+        GROUP BY countryId<br>
+        ORDER BY avgCompetitors DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#avg_better_single" class="list-group-item panel-heading">
+        <h4 class="panel-title">Cubers whose average world ranks are all better than their single world ranks</h4>
+      </a>
+      <p id="avg_better_single" class="list-group-item panel-body">
+        SELECT s.personId Cuber, Events<br>
+        FROM RanksSingle s<br>
+        LEFT JOIN RanksAverage a ON s.personId=a.personId AND s.eventId=a.eventId<br>
+        JOIN (SELECT personId, COUNT(DISTINCT eventId) Events FROM Results GROUP BY personId) tmp ON tmp.personId=s.personId<br>
+        GROUP BY s.personId<br>
+        HAVING SUM(IF(a.worldRank, a.worldRank, 0) >= s.worldRank) = 0 AND Events >= 10<br>
+        ORDER BY Events DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#most_solves" class="list-group-item panel-heading">
+        <h4 class="panel-title">Cubers with most official solves</h4>
+      </a>
+      <p id="most_solves" class="list-group-item panel-body">
+        SELECT personId Cuber, SUM((value1>0)+(value2>0)+(value3>0)+(value4>0)+(value5>0)) Solves<br>
+        FROM Results JOIN Competitions ON Competitions.id = competitionId<br>
+        WHERE NOT (eventId = '333mbf' AND year*10000+month*100+day < 20090206)<br>
+        GROUP BY personId<br>
+        HAVING Solves >= 1000<br>
+        ORDER BY Solves DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#largestcomp_ncompetitors" class="list-group-item panel-heading">
+        <h4 class="panel-title">Largest competitions by number of competitors</h4>
+      </a>
+      <p id="largestcomp_ncompetitors" class="list-group-item panel-body">
+        SELECT Competitions.name, year, COUNT(personId) personIds<br>
+        FROM (SELECT competitionId, personId FROM Results GROUP BY personId, competitionId) tmp<br>
+        JOIN Competitions ON Competitions.id = competitionId<br>
+        WHERE Competitions.countryId = 'USA'<br>
+        GROUP BY Competitions.name<br>
+        ORDER BY personIds DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#most_common_events" class="list-group-item panel-heading">
+        <h4 class="panel-title">Most common events</h4>
+      </a>
+      <p id="most_common_events" class="list-group-item panel-body">
+        SELECT COUNT(*) ctr, evs <br>
+        FROM (SELECT GROUP_CONCAT(DISTINCT eventId ORDER BY eventId) evs FROM Results GROUP BY competitionId) tmp<br>
+        GROUP BY evs<br>
+        ORDER BY ctr DESC, evs
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#most_wins" class="list-group-item panel-heading">
+        <h4 class="panel-title">Most events won in 2014 (at least 10)</h4>
+      </a>
+      <p id="most_wins" class="list-group-item panel-body">
+        SELECT<br>
+          personId Cuber,<br>
+          COUNT(DISTINCT eventId) '#Events',<br>
+          GROUP_CONCAT(DISTINCT eventId ORDER BY eventId SEPARATOR ', ') Events<br>
+        FROM Results JOIN Competitions ON Competitions.id=competitionId<br>
+        WHERE pos=1 AND roundId IN ('f', 'c') AND best>0 AND year=2014<br>
+        GROUP BY personId<br>
+        HAVING COUNT(DISTINCT eventId) >= 10<br>
+        ORDER BY 2 DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#most_nrs_1comp" class="list-group-item panel-heading">
+        <h4 class="panel-title">Most NRs at one competition</h4>
+      </a>
+      <p id="most_nrs_1comp" class="list-group-item panel-body">
+        SELECT CONCAT(personId, '@', competitionId) Cuber, SUM((regionalSingleRecord LIKE '%R')+(regionalAverageRecord LIKE '%R')) NRs, personCountryId Country, competitionId Competition<br>
+        FROM Results<br>
+        GROUP BY personId, competitionId<br>
+        HAVING NRs >= 17<br>
+        ORDER BY NRs DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#most_podiums_1comp" class="list-group-item panel-heading">
+        <h4 class="panel-title">Most podiums in a competition</h4>
+      </a>
+      <p id="most_podiums_1comp" class="list-group-item panel-body">
+        SELECT personname, competitionid, COUNT(*)<br>
+        FROM results<br>
+        WHERE roundid IN ("c","f") AND pos IN (1,2,3) AND best > 0<br>
+        GROUP BY personname, competitionid<br>
+        HAVING COUNT(*)>14<br>
+        ORDER BY COUNT(*) DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#most_wins_1comp" class="list-group-item panel-heading">
+        <h4 class="panel-title">Most wins in a competition</h4>
+      </a>
+      <p id="most_wins_1comp" class="list-group-item panel-body">
+        SELECR personname, competitionid, COUNT(*)<br>
+        FROM results<br>
+        WHERE roundid IN ("c","f") AND pos IN (1) AND best > 0<br>
+        GROUP BY personname, competitionid<br>
+        HAVING COUNT(*)>10<br>
+        ORDER BY COUNT(*) desc
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#new_members" class="list-group-item panel-heading">
+        <h4 class="panel-title">New WCA members in 2014</h4>
+      </a>
+      <p id="new_members" class="list-group-item panel-body">
+        SELECT COUNT(*) freshmen, countryId country<br>
+        FROM Persons<br>
+        WHERE id LIKE '2014%'<br>
+        GROUP BY countryId<br>
+        ORDER BY freshmen DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#wrs_by_continent" class="list-group-item panel-heading">
+        <h4 class="panel-title">Number of WRs by continent</h4>
+      </a>
+      <p id="wrs_by_continent" class="list-group-item panel-body">
+        SELECT continentId CompetitionsIn, SUM((regionalSingleRecord='WR')+(regionalAverageRecord='WR')) WRs<br>
+        FROM Results, Competitions, Countries<br>
+        WHERE Competitions.id = competitionId<br>
+        AND Countries.id = Competitions.countryId<br>
+        GROUP BY continentId<br>
+        ORDER BY WRs DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#per_wrs" class="list-group-item panel-heading">
+        <h4 class="panel-title">Percentage of competitors with WR</h4>
+      </a>
+      <p id="per_wrs" class="list-group-item panel-body">
+        SET @totalPersons := (SELECT COUNT(*) FROM Persons);<br>
+        <br>
+        SELECT COUNT(DISTINCT personId) * 100 / @totalPersons<br>
+        FROM Results<br>
+        WHERE regionalSingleRecord='WR' or regionalAverageRecord='WR';
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#per_wrcrnrs" class="list-group-item panel-heading">
+        <h4 class="panel-title">Percentage of competitors with WR, CR or NR</h4>
+      </a>
+      <p id="per_wrcrnrs" class="list-group-item panel-body">
+        SET @totalPersons := (SELECT COUNT(*) FROM Persons);<br>
+        <br>
+        SELECT COUNT(DISTINCT personId) * 100 / @totalPersons<br>
+        FROM Results<br>
+        WHERE regionalSingleRecord in ('WR','ER','NR','AsR','SAR','OcR','NAR','AfR') or regionalAverageRecord IN ('WR','ER','NR','AsR','SAR','OcR','NAR','AfR');
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#most_rholders" class="list-group-item panel-heading">
+        <h4 class="panel-title">Records with most holders</h4>
+      </a>
+      <p id="most_rholders" class="list-group-item panel-body">
+        SELECT eventId Event, Kind, Region,
+          CONCAT('[url=http://www.worldcubeassociation.org/results/regions.php?regionId=', regionId, '&eventId=', eventId, '&history=History]', COUNT(DISTINCT personId), '[/url]') Holders<br>
+        FROM (
+        SELECT eventId, 'World' Region, '' regionId, 'Single' Kind, personId FROM Results WHERE regionalSingleRecord='WR' <br>
+        UNION ALL<br>
+        SELECT eventId, 'World' Region, '' regionId, 'Average' Kind, personId FROM Results WHERE regionalAverageRecord='WR' <br>
+        UNION ALL<br>
+        SELECT eventId, Continents.name Region, Continents.id regionId, 'Single' Kind, personId FROM Results <br>
+        JOIN Countries ON Countries.id=personCountryId 
+        JOIN Continents on Continents.id=continentId WHERE regionalSingleRecord in(recordName, 'WR') <br>
+        UNION ALL<br>
+        SELECT eventId, Continents.name Region, Continents.id regionId, 'Average' Kind, personId FROM Results <br>
+        JOIN Countries ON Countries.id=personCountryId 
+        JOIN Continents on Continents.id=continentId WHERE regionalAverageRecord in(recordName, 'WR') <br>
+        UNION ALL<br>
+        SELECT eventId, personCountryId Region, personCountryId regionId, 'Single' Kind, personId FROM Results WHERE regionalSingleRecord LIKE '%R' <br>
+        UNION ALL<br>
+        SELECT eventId, personCountryId Region, personCountryId regionId, 'Average' Kind, personId FROM Results WHERE regionalAverageRecord LIKE '%R'
+        ) tmp<br>
+        GROUP BY eventId, Kind, Region<br>
+        HAVING COUNT(DISTINCT personId)>=10<br>
+        ORDER BY COUNT(DISTINCT personId) DESC
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#slowest_solves" class="list-group-item panel-heading">
+        <h4 class="panel-title">Slowest Solves (excluding all blinds)</h4>
+      </a>
+      <p id="slowest_solves" class="list-group-item panel-body">
+        SELECT
+          competitionId, eventId, roundId, personName, GREATEST(value1, value2, value3, value4, value5) 'Worst[T]',
+          value1 'value1[T]', value2 'value2[T]', value3 'value3[T]', value4 'value4[T]', value5 'value5[T]'
+        FROM Results<br>
+        WHERE eventId NOT IN ('333mbf', '333mbo', '555bf', '444bf')<br>
+        ORDER BY 5 DESC<br>
+        LIMIT 20;
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+      <a href="#top50_wrs" class="list-group-item panel-heading">
+        <h4 class="panel-title">Top50 with most WRs set</h4>
+      </a>
+      <p id="top50_wrs" class="list-group-item panel-body">
+        SELECT personName, SUM(IF(regionalSingleRecord="WR",1,0)+IF(regionalAverageRecord="WR",1,0)) WRs<br>
+        FROM `Results`<br>
+        GROUP BY personId<br>
+        ORDER BY WRs DESC<br>
+        LIMIT 50
+        <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+      </p>
+    </div>
+
+    <p id="evenmore_queries"><a href="#">Even more....</a></p>
+
+    <div id="morequeries">
+      <div class="list-group panel-default">
+        <a href="#444bf_success1" class="list-group-item panel-heading">
+          <h4 class="panel-title">4BLD success at first competition</h4>
+        </a>
+        <p id="444bf_success1" class="list-group-item panel-body">
+          SELECT CONCAT(personId, '#444bf') Cuber, DATE(year*10000+month*100+day) Date<br>
+          FROM Results JOIN Competitions ON Competitions.id=competitionId<br>
+          GROUP BY personId<br>
+          HAVING MIN(year*20000+month*200+day*2-(eventId='444bf' AND best>0)) % 2<br>
+          ORDER BY Date
+          <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+        </p>
+        <a href="#comps_by_country" class="list-group-item panel-heading">
+          <h4 class="panel-title">Competition Days by Country (sorted by CompetitionDays)</h4>
+        </a>
+        <p id="comps_by_country" class="list-group-item panel-body">
+          SELECT Country, CompetitionDays, Competitions, ROUND(CompetitionDays/Competitions, 2) DaysPerCompetition<br>
+          FROM
+          (SELECT countryId Country, SUM(DATEDIFF(year*10000+endMonth*100+endDay,year*10000+month*100+day)+1) CompetitionDays, COUNT(*) Competitions<br>
+           FROM Competitions<br>
+           WHERE DATE(year*10000+month*100+day) <= DATE(now())<br>
+           GROUP BY countryId) tmp<br>
+          ORDER BY CompetitionDays DESC
+          <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+        </p>
+        <a href="#competitors_worlds" class="list-group-item panel-heading">
+          <h4 class="panel-title">Chinese Competitors at Worlds</h4>
+        </a>
+        <p id="competitors_worlds" class="list-group-item panel-body">
+          SELECT competitionId Competition, COUNT(DISTINCT personId) ChineseCompetitors<br>
+          FROM Results<br>
+          WHERE competitionId rlike '^WC' AND personCountryId = 'China'<br>
+          GROUP BY competitionId
+          <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+        </p>
+        <a href="#events_competitions" class="list-group-item panel-heading">
+          <h4 class="panel-title">Events in Competitions 2014</h4>
+        </a>
+        <p id="events_competitions" class="list-group-item panel-body">
+          CREATE TABLE ce2014<br>
+          SELECT competitionId, eventId<br>
+          FROM (SELECT DISTINCT competitionId, eventId FROM Results) ce JOIN Competitions ON Competitions.id=competitionId<br>
+          WHERE year=2014;<br>
+          <br>
+          SELECT eventId Event, CONCAT(round(100*COUNT(competitionId)/comps, 1), '%') Competitions<br>
+          FROM ce2014, (SELECT COUNT(DISTINCT competitionId) comps FROM ce2014) tmp<br>
+          GROUP BY eventId<br>
+          ORDER BY 2 desc;
+
+          DROP TABLE ce2014;
+          <br><br> <button type="button" class="btn btn-default btn-block copy">Copy</button>
+        </p>
+      </div>
+    </div>
+
+		{% include 'footer.html' %}
+	</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='assets/js/jquery-1.11.3.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='assets/js/bootstrap.min.js') }}"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="{{ url_for('static', filename='assets/js/ie10-viewport-bug-workaround.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='query.js') }}"></script>
+</body>
+</html>

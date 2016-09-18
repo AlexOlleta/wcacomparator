@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="static/favicon.ico">
+
+	<title>WCA Comparator - Compare</title>
+
+	<link href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+
+  <!-- Cubing Icons -->
+  <link href="{{ url_for('static', filename='assets/css/cubing-icons.css') }}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body onload="show_output()">
+	{% include 'header.html' %}
+
+	<div class="jumbotron">
+    <div class="container">
+      <h1>WCA Comparator - Compare</h1>
+      
+      <p>Compare your profile with another one or any two profiles. Compare information about your country with another one or two any countries. <i>It's neccesary to have both WCA IDs to search them.</i></p>
+    </div>
+  </div>
+
+	<div class="container">
+		<div class="row">
+      <form>
+        <!--<div class="col-md-8">-->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="inputid">Introduce a WCA profile or a Country:</label>
+              <input type="text" class="form-control" placeholder="WCA ID ó Pais" id="wcaid-country1"><br>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="inputid">Introduce another WCA profile or a Country:</label>
+              <input type="text" class="form-control" placeholder="WCA ID ó Pais" id="wcaid-country2"><br>
+            </div>
+          </div>
+          <div class="form-group">
+            <button type="button" id="get-wcaids-countries" class="btn btn-primary btn-block">{{ compare }}</button>
+          </div>
+        <!--</div>-->
+      <form>
+    </div>
+
+    <br>
+
+    <div id="output-wcaids">
+
+      <div>                            
+        <ul class="nav nav-tabs" role="tablist" id="wcaids-submenu">
+          <li role="presentation" class="active"><a href="#output-wcaids-evolution" aria-controls="output-wcaids-evolution" role="tab" data-toggle="tab">Evolution</a></li>
+          <li role="presentation"><a href="#output-wcaids-achievements" aria-controls="output-wcaids-achievements" role="tab" data-toggle="tab">Achievements</a></li>
+          <li role="presentation"><a href="#output-wcaids-nemesis" aria-controls="output-wcaids-nemesis" role="tab" data-toggle="tab">Nemesis</a></li>
+          <li role="presentation"><a href="#output-wcaids-more" aria-controls="output-wcaids-more" role="tab" data-toggle="tab">More Information</a></li>
+        </ul>
+      </div>
+
+      <div class="tab-content">
+
+        <div role="tabpanel" class="tab-pane active" id="output-wcaids-evolution">
+          <h3>Results</h3>
+          <p>Here you are the comparison between {{ params.fullname1 }} ({{ params.ncomps1 }} competitions) and {{ params.fullname2 }} ({{ params.ncomps2 }} competitions).</p>
+
+          <table id="records" class="table table-hover">
+            <thead>
+              <tr><th>Categoría</th><th>Single</th><th>Single</th><th>Average</th><th>Average</th></tr>
+            </thead>
+            <tbody>
+              {% for event in params.records %}
+                <tr>
+                  <th scope="row"><span class="cubing-icon icon-{{ event }}"></span></th>
+                  <td>{{ params.records[event]["single"][0] }}</td>
+                  <td>{{ params.records[event]["single"][1] }}</td>
+                  <td>{{ params.records[event]["average"][0] }}</td>
+                  <td>{{ params.records[event]["average"][1] }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="output-wcaids-achievements">
+          <h3>Results</h3>
+          <br>
+          <p>Here you are some of yours achievements. You can find more in <i>More information</i> tab.</p>
+
+          <div class="row">
+            <h3>Number of Medals</h3>
+            <div class="col-md-6">
+              <table id="records" class="table table-hover">
+                <thead>
+                  <tr><th colspan="4" class="text-center">{{ params.fullname1 }}</th></tr>
+                  <tr><th>Gold</th><th>Silver</th><th>Bronze</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                      <td>{{ params.medallas1["oros"] }}</td>
+                      <td>{{ params.medallas1["platas"] }}</td>
+                      <td>{{ params.medallas1["bronces"] }}</td>
+                      <td>{{ params.medallas1["total"] }}</td>
+                    </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table id="records" class="table table-hover">
+                <thead>
+                  <tr><th colspan="4" class="text-center">{{ params.fullname2 }}</th></tr>
+                  <tr><th>Gold</th><th>Silver</th><th>Bronze</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                      <td>{{ params.medallas2["oros"] }}</td>
+                      <td>{{ params.medallas2["platas"] }}</td>
+                      <td>{{ params.medallas2["bronces"] }}</td>
+                      <td>{{ params.medallas2["total"] }}</td>
+                    </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3>Mixed</h3>
+          <table id="records" class="table table-hover">
+            <thead>
+              <tr><th></th><th colspan="4" class="text-center">{{ params.fullname1 }}</th><th colspan="4" class="text-center">{{ params.fullname2 }}</th></tr>
+              <tr><th>Achievement</th><th>Total</th><th>NR</th><th>CR</th><th>WR</th><th>Total</th><th>NR</th><th>CR</th><th>WR</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                  <td>Number of Medals</td>
+                  <td>{{ params.medallas1["total"] }}</td>
+                  <td>{{ params.medalsn1[wcaid1]["pos"] }}</td>
+                  <td>{{ params.medalsc1[wcaid1]["pos"] }}</td>
+                  <td>{{ params.medalswr[wcaid1]["pos"] }}</td>
+                  <td>{{ params.medallas2["total"] }}</td>
+                  <td>{{ params.medalsn2[wcaid2]["pos"] }}</td>
+                  <td>{{ params.medalsc2[wcaid2]["pos"] }}</td>
+                  <td>{{ params.medalswr[wcaid2]["pos"] }}</td>
+                </tr>
+                <tr>
+                  <td>Records</td>
+                  <td>{{ params.rank_record1[wcaid1]["total"] }}</td>
+                  <td>{{ params.rank_record1[wcaid1]["pos"] }}</td>
+                  <td>{{ params.records_cont1[wcaid1]["pos"] }}</td>
+                  <td>{{ params.rankrecord_world[wcaid1]["pos"] }}</td>
+                  <td>{{ params.rank_record2[wcaid2]["total"] }}</td>
+                  <td>{{ params.rank_record2[wcaid2]["pos"] }}</td>
+                  <td>{{ params.records_cont2[wcaid2]["pos"] }}</td>
+                  <td>{{ params.rankrecord_world[wcaid2]["pos"] }}</td>
+                </tr>
+                <!--<tr>
+                  <td>Top100</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>-->
+            </tbody>
+          </table>
+
+          <h3>Competitions per year</h3>
+          <table id="wca-achviementes-comps" class="table table-hover">
+            <thread>
+              <tr>
+                <th>Name</th>
+                {% for year in params.compsyears %}
+                <th>{{ year }}</th>
+                {% endfor %}
+              </tr>
+            </thread>
+            <tbody>
+              <tr>
+                <td>{{ params.fullname1 }}</td>
+                {% for year in params.compsyears %}
+                <td>{{ params.compsyears[year][0] }}</td>
+                {% endfor %}
+              </tr>
+              <tr>
+                <td>{{ params.fullname2 }}</td>
+                {% for year in params.compsyears %}
+                <td>{{ params.compsyears[year][1] }}</td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="output-wcaids-nemesis">
+          <h3>Results</h3>
+            <p>Here you are the comparison between {{ params.fullname1 }} ({{ params.ncomps1 }} competitions) and {{ params.fullname2 }} ({{ params.ncomps2 }} competitions).</p>
+
+          <table id="records" class="table table-hover">
+            <thead>
+              <tr><th></th><th colspan="3" class="text-center">{{ params.fullname1 }}</th><th colspan="3" class="text-center">{{ params.fullname2 }}</th></tr>
+              <tr><th>Kind of Nemesis</th><th>Country</th><th>Continent</th><th>World</th><th>Country</th><th>Continent</th><th>World</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                  <th scope="row">Nº of Nemesis</th>
+                  <td>{{ params.nempais1 }}</td>
+                  <td>{{ params.nemcont1 }}</td>
+                  <td>{{ params.nemworld1 }}</td>
+                  <td>{{ params.nempais2 }}</td>
+                  <td>{{ params.nemcont2 }}</td>
+                  <td>{{ params.nemworld2 }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Nemesis of</th>
+                  <td>{{ params.nemofpais1 }}</td>
+                  <td>{{ params.nemofcont1 }}</td>
+                  <td>{{ params.nemofworld1 }}</td>
+                  <td>{{ params.nemofpais2 }}</td>
+                  <td>{{ params.nemofcont2 }}</td>
+                  <td>{{ params.nemofworld2 }}</td>
+                </tr>
+            </tbody>
+          </table>
+          <div id="nembtn">
+            Némesis: <button type="button" class="btn btn-success" id="nemesis">¿Es némesis?</button>
+            <class id="isnemesis" style="display:none;">{{ params.isnemesis }}</class>
+          </div>         
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="output-wcaids-more">
+          <h3>Resultados</h3>
+          <p>Here you are lot of more information about {{ params.fullname1 }} and {{ params.fullname2 }} from different sources.</p>
+
+          <table id="wca-info" class="table table-hover">
+            <thead>
+              <tr><th>Information</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://www.worldcubeassociation.org/results/p.php?i={{ wcaid1 }}" target="_blank">{{ params.fullname1 }}</a> / <a href="https://www.worldcubeassociation.org/results/p.php?i={{ wcaid2 }}" target="_blank">{{ params.fullname2 }}</a></td>
+                <td>WCA</td>
+              </tr>
+              <tr>
+                <td><a href="http://wcadb.net/person.php?id={{ wcaid1 }}" target="_blank">{{ params.fullname1 }}</a> / <a href="http://wcadb.net/person.php?id={{ wcaid2 }}" target="_blank">{{ params.fullname2 }}</a></td>
+                <td>WCADB.NET</td>
+              </tr>
+              <tr>
+                <td><a href="http://cubingchina.com/results/person/{{ wcaid1 }}" target="_blank">{{ params.fullname1 }}</a> / <a href="http://cubingchina.com/results/person/{{ wcaid2 }}" target="_blank">{{ params.fullname2 }}</a></td>
+                <td>Cubing China</td>
+              </tr>
+              <!--{% for source in params.sources %}
+                {% for link in params.sources[source]["links"] %}
+                <tr>
+                  <td><a href='{{ link[0] }}' target="_blank">{{ link[1] }}</a></td>
+                  <td>{{ params.sources[source]["name"] }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}-->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <hr>
+	
+		{% include 'footer.html' %}
+	</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='assets/js/jquery-1.11.3.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='assets/js/bootstrap.min.js') }}"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="{{ url_for('static', filename='assets/js/ie10-viewport-bug-workaround.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='compare.js') }}"></script>
+</body>
+</html>

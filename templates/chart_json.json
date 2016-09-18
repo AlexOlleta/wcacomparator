@@ -1,0 +1,6 @@
+{
+    "labels": "{{ params.n1 }}",
+    "labels2": "{{ params.n2 }}",
+    "bests": "{{ params.evo['best'] }}",
+    "averages": "{{ params.evo['average'] }}"
+}

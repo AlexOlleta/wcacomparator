@@ -1,0 +1,4 @@
+{
+	"title": {{ params.result }},
+	"sql": {{ params.json }}
+}

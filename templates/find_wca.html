@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="static/favicon.ico">
+
+	<title>WCA Comparator - Find</title>
+
+	<link href="{{ url_for('static', filename='assets/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='estilos.css') }}" rel="stylesheet">
+
+  <!-- Cubing Icons -->
+  <link href="{{ url_for('static', filename='assets/css/cubing-icons.css') }}" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min.js"></script>
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body onload="show_output();">
+	{% include 'header.html' %}
+
+	<div class="jumbotron">
+    <div class="container">
+      <h1>WCA Comparator - Find</h1>
+        <p>Find your profile or another cuber's one. Find about your country or about another's one. Find some national, continental or world rankings. <i>It's neccesary to have a WCA ID to find someone's profile.</i></p>
+    </div>
+  </div>
+
+	<div class="container">
+		<div class="row">
+      <form>
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="inputid">Introduce a WCA profile or a Country:</label>
+            <input type="text" class="form-control" placeholder="WCA ID ó Pais" id="wcaid-country"><br>
+            <button type="button" id="get-wcaid-country" class="btn btn-primary btn-block">{{ find }}</button>
+          </div>
+        </div>
+      <form>
+    </div>
+
+    <br>
+
+    <div id="output-wcaid">
+
+      <div>                            
+        <ul class="nav nav-tabs" role="tablist" id="wcaid-submenu">
+          <li role="presentation" class="active"><a href="#output-wcaid-evolution" aria-controls="output-wcaid-evolution" role="tab" data-toggle="tab">Evolution</a></li>
+          <li role="presentation"><a href="#output-wcaid-achievements" aria-controls="output-wcaid-achievements" role="tab" data-toggle="tab">Achievements</a></li>
+          <li role="presentation"><a href="#output-wcaid-nemesis" aria-controls="output-wcaid-nemesis" role="tab" data-toggle="tab">Nemesis</a></li>
+          <li role="presentation"><a href="#output-wcaid-more" aria-controls="output-wcaid-more" role="tab" data-toggle="tab">More Information</a></li>
+        </ul>
+      </div>
+
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="output-wcaid-evolution">
+          <h3>Results</h3>
+          <p>Here you are <a href="https://www.worldcubeassociation.org/results/p.php?i={{ params.wcaid }}" target="_blank">{{ params.fullname }}'s</a> personal records after {{ params.ncomps }} competitions.</p>
+
+          <table id="wca-records" class="table table-hover">
+            <thead>
+              <tr><th>Event</th><th>Single</th><th>Average</th><th>Evolution</th></tr>
+            </thead>
+            <tbody>
+              {% for event in params.records %}
+                <tr>
+                  <th scope="row"><span class="cubing-icon icon-{{ event }}"></span> {{ params.records[event][2] }}</th>
+                  <td>{{ params.records[event][0] }}</td>
+                  <td>{{ params.records[event][1] }}</td>
+                  <td>
+                    <a href="#goto_chart"><button type="button" class="btn btn-success graph" value="{{ event }}">Evolution</button></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <a name="goto_chart"></a>
+          <div class="loader"></div>
+          <canvas id="evo" width="600" height="300"></canvas>
+
+        </div>
+
+
+        <div role="tabpanel" class="tab-pane" id="output-wcaid-achievements">
+          <br>
+          <p>Here you are some of {{ params.fullname }}'s' achievements. You can find more in <i>More information</i> tab.</p>
+
+          <div class="row">
+            <div class="col-md-6">
+              <h3>Number of competitions</h3>
+              <table id="wca-achievements-ncomps" class="table table-hover">
+                <thead>
+                  <tr><th>Quantity</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ params.ncomps }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="col-md-6">
+              <h3>Number of records</h3>
+              <table id="wca-achievements-nrecords" class="table table-hover">
+                <thead>
+                  <tr><th>NR</th><th>CR</th><th>WR</th><th>Quantity</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ params.nrecords[0] }}</td>
+                    <td>{{ params.nrecords[1] }}</td>
+                    <td>{{ params.nrecords[2] }}</td>
+                    <td>{{ params.nrecords[3] }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3>Competitions per year</h3>
+          <table id="wca-achviementes-comps" class="table table-hover">
+            <thread>
+              <tr>
+                {% for year in params.compsyear %}
+                <th>{{ year[0]}}</th>
+                {% endfor %}
+              </tr>
+            </thread>
+            <tbody>
+              <tr>
+                {% for year in params.compsyear %}
+                <td>{{ year[1]}}</td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Number of medals</h3>
+          <table id="wca-achievements-medals" class="table table-hover">
+            <thead>
+              <tr><th>Gold</th><th>Silver</th><th>Bronze</th><th>Total</th><th>NR</th><th>CR</th><th>WR</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ params.medallas.oros }}</td>
+                <td>{{ params.medallas.platas }}</td>
+                <td>{{ params.medallas.bronces }}</td>
+                <td>{{ params.medallas.total }}</td>
+                <td>{{ params.medallasr[0] }}</td>
+                <td>{{ params.medallasr[1] }}</td>
+                <td>{{ params.medallasr[2] }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!--<h3>Results</h3>
+          <p>Hola {{ params.fullname }}, estos son tus {{ params.ncomps }} campeonatos.</p>
+
+          <table id="wca-achievements" class="table table-hover">
+            <thead>
+              <tr><th>Nombre</th><th>Ciudad</th><th>Fecha</th><th>Mis resultados</th></tr>
+            </thead>
+            <tbody>
+              {% for event in params.comps %}
+                <tr>
+                  <th scope="row"><a href="https://www.worldcubeassociation.org/results/c.php?i={{ event }}">{{ params.comps[event][0] }}</a></th>
+                  <td>{{ params.comps[event][1] }}</td>
+                  <td>{{ params.comps[event][4] }}-{{ params.comps[event][6] }}/{{ params.comps[event][3] }}/{{ params.comps[event][2] }}</td>
+                  <td>
+                    <a class="btn btn-success" href="{{ url_for('find') }}?comp={{ event }}" role="button">Resultados</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>-->
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="output-wcaid-nemesis">
+          <h3>Results</h3>
+          <p>Here you are {{ params.fullname }}'s nemessis, being nemessis of {{ params.lnemesis }} people around the world.</p>
+
+          <table id="wca-nemesis" class="table table-hover">
+            <thead>
+              <tr><th>Name</th><th><abbr title="Events in which you could beat he">Nearest Events</abbr></th><th>Events</th></tr>
+            </thead>
+            <tbody>
+              {% for person in params.nemesis.keys() %}
+              <tr>
+                <td><a href="https://www.worldcubeassociation.org/results/p.php?i={{ person }}" target="_blank">{{ params.nemesis[person]["name"] }}</a></td>
+                <td>{{ params.nemesis[person]["q"] }}</td>
+                <td>{{ params.nemesis[person]["events"] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="output-wcaid-more">
+          <h3>Results</h3>
+          <p>Here you are lot of more information about {{ params.fullname }} from different sources.</p>
+
+          <table id="wca-info" class="table table-hover">
+            <thead>
+              <tr><th>Information</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://www.worldcubeassociation.org/results/p.php?i={{ params.wcaid }}" target="_blank">WCA official profile</a></td>
+                <td>World Cube Association</td>
+              </tr>
+              <tr>
+                <td><a href="http://wcadb.net/person.php?id={{ params.wcaid }}" target="_blank">WCA Database's profile</a></td>
+                <td>WCA Database</td>
+              </tr>
+              <tr>
+                <td><a href="http://cubingchina.com/results/person/{{ params.wcaid }}" target="_blank">Cubing China DB's profile</a></td>
+                <td>Cubing China</td>
+              </tr>
+              <!--{% for source in params.sources %}
+                {% for link in params.sources[source]["links"] %}
+                <tr>
+                  <td><a href='{{ link[0] }}' target="_blank">{{ link[1] }}</a></td>
+                  <td>{{ params.sources[source]["name"] }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}-->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <hr>
+	
+		{% include 'footer.html' %}
+	</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='assets/js/jquery-1.11.3.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='assets/js/bootstrap.min.js') }}"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="{{ url_for('static', filename='assets/js/ie10-viewport-bug-workaround.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='find.js') }}"></script>
+</body>
+</html>
